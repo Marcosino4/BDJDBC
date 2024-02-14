@@ -10,15 +10,20 @@ import java.io.IOException;
 public class Ventana extends JFrame {
     private static final long serialVersionUID = 1L;
 
+    // Área de mensajes
     private final JTextArea mensajes = new JTextArea();
+    // Prompt de envío
     private final JTextField prompt = new JTextField();
+    // Botón de envío
     private final JButton boton = new JButton();
 
     private DataOutputStream dos;
 
     public Ventana() {
+        // Distribución de los componentes por zonas de la ventana
         setLayout(new BorderLayout());
 
+        // Agregar el JTextArea a un JScrollPane
         JScrollPane scrollPane = new JScrollPane(mensajes);
         scrollPane.setPreferredSize(new Dimension(400, 200));
 
@@ -28,11 +33,13 @@ public class Ventana extends JFrame {
         boton.setText("Enviar");
         boton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
+                // Método que se ejecuta cuando hagamos click
                 enviar();
             }
         });
 
-        add(scrollPane, BorderLayout.NORTH); 
+        add(scrollPane, BorderLayout.NORTH); // Agregar el JScrollPane en lugar directamente del JTextArea
+        add(prompt, BorderLayout.CENTER);
         add(boton, BorderLayout.SOUTH);
 
         pack();
@@ -49,6 +56,7 @@ public class Ventana extends JFrame {
             dos.writeUTF(mensaje);
             mensajes.append(mensaje + "\n");
 
+            // Pequeño retraso para permitir que la GUI se actualice completamente
             SwingUtilities.invokeLater(() -> {
                 mensajes.setCaretPosition(mensajes.getDocument().getLength());
             });
@@ -73,6 +81,3 @@ public class Ventana extends JFrame {
         });
     }
 }
-
-
-

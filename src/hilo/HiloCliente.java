@@ -26,28 +26,65 @@ public class HiloCliente extends Thread {
 			DataInputStream dis = new DataInputStream(socket.getInputStream());
 			DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
 			do {
-				dos.writeUTF("1.Insert 2.Delete 3.Update 4.Ver 5.Salir");
+				dos.writeUTF("1.Insert \n2.Delete \n3.Update \n4.Ver \n5.Salir\n");
 				mensaje = dis.readUTF();
-				switch (mensaje) {
-				case "1":
-					insertEntry(dos, dis, con);
-					break;
-				case "2":
-					deleteEntry(dos, dis, con);
-					break;
-				case "3":
-					updateEntry(dos, dis, con);
-					break;
-				case "4":
+				
+				if (mensaje.equals("1")) {
+					dos.writeUTF("Introduzca nombre: ");
+					String nombre = dis.readUTF();
+
+					dos.writeUTF("Introduzca primer apellido:  ");
+					String apellido = dis.readUTF();
+
+					dos.writeUTF("Introduzca segundo apellido:  ");
+					String apellido2 = dis.readUTF();
+
+					dos.writeUTF("Introduzca edad: ");
+					int edad = Integer.parseInt(dis.readUTF());
+
+					dos.writeUTF("Introduzca fecha de nacimiento(Ano-mes-dia): ");
+					String nacimiento = dis.readUTF();
+
+					Cliente nuevoCliente = new Cliente(0, nombre, apellido, apellido2, edad, nacimiento);
+					int nFilas = insertar(con, nuevoCliente);
+					dos.writeUTF("Se han insertado " + nFilas + " registro(s) correctamente");
+
+				} else if (mensaje.equals("2")) {
+					dos.writeUTF("Introduzca id a eliminar: ");
+					int nFilas = borrar(con, Integer.parseInt(dis.readUTF()));
+
+					dos.writeUTF("Se han borrado " + nFilas + " registro(s) correctamente");
+
+				} else if (mensaje.equals("3")) {
+					dos.writeUTF("Introduzca id: ");
+					int id = Integer.parseInt(dis.readUTF());
+
+					dos.writeUTF("Introduzca nombre: ");
+					String nombre = dis.readUTF();
+
+					dos.writeUTF("Introduzca primer apellido:  ");
+					String apellido = dis.readUTF();
+
+					dos.writeUTF("Introduzca segundo apellido:  ");
+					String apellido2 = dis.readUTF();
+
+					dos.writeUTF("Introduzca edad: ");
+					int edad = Integer.parseInt(dis.readUTF());
+
+					dos.writeUTF("Introduzca fecha de nacimiento(Ano-mes-dia): ");
+					String nacimiento = dis.readUTF();
+
+					Cliente nuevoCliente = new Cliente(id, nombre, apellido, apellido2, edad, nacimiento);
+					int nFilas = update(con, nuevoCliente);
+					dos.writeUTF("Se han actualizado " + nFilas + " registro(s) correctamente");
+
+				} else if (mensaje.equals("4")) {
 					mensaje = get(con, dos);
 					dos.writeUTF(mensaje);
-				case "5":
+
+				} else if (mensaje.equals("5")) {
 					mensaje = "EXIT";
 					dos.writeUTF("EXIT");
-					break;
-				default:
-					dos.writeUTF("Invalid option, please choose a valid option.");
-					break;
 				}
 			} while (!mensaje.equals("EXIT"));
 
@@ -60,79 +97,11 @@ public class HiloCliente extends Thread {
 		}
 	}
 
-	private static void insertEntry(DataOutputStream dos, DataInputStream dis, Connection con) {
-		try {
-			dos.writeUTF("Introduzca nombre: ");
-			String nombre = dis.readUTF();
-
-			dos.writeUTF("Introduzca primer apellido:  ");
-			String apellido = dis.readUTF();
-
-			dos.writeUTF("Introduzca segundo apellido:  ");
-			String apellido2 = dis.readUTF();
-
-			dos.writeUTF("Introduzca edad: ");
-			int edad = Integer.parseInt(dis.readUTF());
-
-			dos.writeUTF("Introduzca fecha de nacimiento(Ano-mes-dia): ");
-			String nacimiento = dis.readUTF();
-
-			Cliente nuevoCliente = new Cliente(0, nombre, apellido, apellido2, edad, nacimiento);
-			int nFilas = insertar(con, nuevoCliente);
-			dos.writeUTF("Se han insertado " + nFilas + " registro(s) correctamente");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	private static void deleteEntry(DataOutputStream dos, DataInputStream dis, Connection con) {
-		try {
-			dos.writeUTF("Introduzca id a eliminar: ");
-			int nFilas = borrar(con, Integer.parseInt(dis.readUTF()));
-			dos.writeUTF("Se han borrado " + nFilas + " registro(s) correctamente");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-
-	private static void updateEntry(DataOutputStream dos, DataInputStream dis, Connection con) {
-		try {
-			dos.writeUTF("Introduzca id: ");
-			int id = Integer.parseInt(dis.readUTF());
-
-			dos.writeUTF("Introduzca nombre: ");
-			String nombre = dis.readUTF();
-
-			dos.writeUTF("Introduzca primer apellido:  ");
-			String apellido = dis.readUTF();
-
-			dos.writeUTF("Introduzca segundo apellido:  ");
-			String apellido2 = dis.readUTF();
-
-			dos.writeUTF("Introduzca edad: ");
-			int edad = Integer.parseInt(dis.readUTF());
-
-			dos.writeUTF("Introduzca fecha de nacimiento(Ano-mes-dia): ");
-			String nacimiento = dis.readUTF();
-
-			Cliente nuevoCliente = new Cliente(id, nombre, apellido, apellido2, edad, nacimiento);
-			int nFilas = update(con, nuevoCliente);
-			dos.writeUTF("Se han actualizado " + nFilas + " registro(s) correctamente");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	private static int update(Connection con, Cliente cliente) {
 		String sql = "UPDATE cliente SET nombre = ?, apellido1 = ?, apellido2 = ?, edad = ?, nacimiento = ? WHERE id = ?";
 		int nFilas = 0;
 		
 		try (PreparedStatement ps = con.prepareStatement(sql)) {
-			
 			ps.setString(1, cliente.getNombre());
 			ps.setString(2, cliente.getApellido1());
 			ps.setString(3, cliente.getApellido2());
@@ -141,6 +110,7 @@ public class HiloCliente extends Thread {
 			ps.setInt(6, cliente.getId());
 
 			nFilas = ps.executeUpdate();
+			
 		} catch (SQLException ex) {
 			ex.printStackTrace();
 		}
@@ -172,6 +142,7 @@ public class HiloCliente extends Thread {
 	private static int borrar(Connection con, int primarykey) {
 		String sql = "DELETE FROM cliente WHERE id = ?";
 		int nFilas = 0;
+		
 		try (PreparedStatement ps = con.prepareStatement(sql)) {
 			ps.setInt(1, primarykey);
 
@@ -186,8 +157,8 @@ public class HiloCliente extends Thread {
 	private static int insertar(Connection con, Cliente clienteNuevo) {
 		String sql = "INSERT INTO cliente values(NULL, ?, ?, ?, ?, ?)";
 		int nFilas = 0;
+		
 		try (PreparedStatement ps = con.prepareStatement(sql)) {
-			
 			ps.setString(1, clienteNuevo.getNombre());
 			ps.setString(2, clienteNuevo.getApellido1());
 			ps.setString(3, clienteNuevo.getApellido2());
